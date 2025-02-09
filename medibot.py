@@ -3,14 +3,16 @@ import streamlit as st
 
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
-
+from sentence_transformers import SentenceTransformer
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
 from langchain_huggingface import HuggingFaceEndpoint
 
+model_name = "sentence-transformers/all-MiniLM-L6-v2"
+
 ## Uncomment the following files if you're not using pipenv as your virtual environment manager
-#from dotenv import load_dotenv, find_dotenv
-#load_dotenv(find_dotenv())
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
 
 
 DB_FAISS_PATH="vectorstore/db_faiss"
@@ -29,9 +31,11 @@ def set_custom_prompt(custom_prompt_template):
 def load_llm(huggingface_repo_id, HF_TOKEN):
     llm=HuggingFaceEndpoint(
         repo_id=huggingface_repo_id,
+        task="text-generation", 
         temperature=0.5,
         model_kwargs={"token":HF_TOKEN,
-                      "max_length":"512"}
+                      "max_length":"512"},
+        huggingfacehub_api_token=HF_TOKEN 
     )
     return llm
 
@@ -64,6 +68,7 @@ def main():
         
         HUGGINGFACE_REPO_ID="mistralai/Mistral-7B-Instruct-v0.3"
         HF_TOKEN=os.environ.get("HF_TOKEN")
+        
 
         try: 
             vectorstore=get_vectorstore()
